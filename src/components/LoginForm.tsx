@@ -38,7 +38,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
                   {user.fullName}
                 </div>
                 <div className="text-sm text-slate-500">
-                  Vai trò: <span className="capitalize">{user.role}</span>
+                  Vai trò: <span className="capitalize">
+                    {user.role === 'admin' ? 'Quản trị viên' : 
+                     user.role === 'manager' ? 'Quản lý' : 
+                     'Chuyên viên'}
+                  </span>
                 </div>
               </div>
               <div className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">

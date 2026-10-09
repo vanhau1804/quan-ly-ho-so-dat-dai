@@ -68,7 +68,11 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <div className="text-left hidden sm:block">
                 <div className="text-xs font-bold text-slate-900">{currentUser.fullName}</div>
-                <div className="text-[10px] uppercase font-semibold text-slate-500">{currentUser.role}</div>
+                <div className="text-[10px] uppercase font-semibold text-slate-500">
+                  {currentUser.role === 'admin' ? 'Quản trị viên' : 
+                   currentUser.role === 'manager' ? 'Quản lý' : 
+                   'Chuyên viên'}
+                </div>
               </div>
               <button
                 onClick={onLogout}
