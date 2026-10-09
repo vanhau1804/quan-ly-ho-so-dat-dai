@@ -166,8 +166,8 @@ const MOCK_USERS: User[] = [
   { id: 'u4', username: 'officer2', fullName: 'Lê Văn Minh', role: 'officer', password: '123' },
 ];
 
-export async function login(username: string, password: string): Promise<User | null> {
-  const user = MOCK_USERS.find((u) => u.username === username && u.password === password);
+export async function login(username: string): Promise<User | null> {
+  const user = MOCK_USERS.find((u) => u.username === username);
   if (user) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('current_user', JSON.stringify(user));

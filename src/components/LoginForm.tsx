@@ -1,32 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { User } from '@/types';
-import { login } from '@/lib/storage';
+import { login, getAllUsers } from '@/lib/storage';
 
 interface LoginFormProps {
   onLoginSuccess: (user: User) => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const users = getAllUsers();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    
-    if (!username || !password) {
-      setError('Vui lòng nhập tài khoản và mật khẩu.');
-      return;
-    }
-
-    const user = await login(username, password);
+  const handleLogin = async (username: string) => {
+    const user = await login(username);
     if (user) {
       onLoginSuccess(user);
-    } else {
-      setError('Tài khoản hoặc mật khẩu không đúng (Mật khẩu mặc định là: 123).');
     }
   };
 
@@ -38,55 +26,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
           <p className="text-sm text-slate-500 mt-2">Đăng nhập hệ thống nội bộ</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Tài khoản
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Nhập tên đăng nhập (vd: admin, manager, officer1)"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Mật khẩu
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu (123)"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          {error && (
-            <div className="text-sm text-rose-600 font-medium bg-rose-50 p-2 rounded-md border border-rose-200">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm mt-4"
-          >
-            Đăng nhập
-          </button>
-        </form>
-
-        <div className="mt-8 text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
-          <p className="font-semibold mb-1">Tài khoản demo:</p>
-          <ul className="list-disc pl-4 space-y-0.5">
-            <li><strong>admin</strong> (Quản trị viên) - 123</li>
-            <li><strong>manager</strong> (Quản lý) - 123</li>
-            <li><strong>officer1</strong> (Chuyên viên) - 123</li>
-            <li><strong>officer2</strong> (Chuyên viên) - 123</li>
-          </ul>
+        <div className="space-y-3">
+          {users.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => handleLogin(user.username)}
+              className="w-full text-left px-5 py-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-between group"
+            >
+              <div>
+                <div className="font-semibold text-slate-900 group-hover:text-blue-700">
+                  {user.fullName}
+                </div>
+                <div className="text-sm text-slate-500">
+                  Vai trò: <span className="capitalize">{user.role}</span>
+                </div>
+              </div>
+              <div className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                →
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
