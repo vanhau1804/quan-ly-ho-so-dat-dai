@@ -14,6 +14,7 @@ export type RecordType =
 export type RecordStatus =
   | 'tiep_nhan'
   | 'dang_xu_ly'
+  | 'cho_duyet'
   | 'cho_thue'
   | 'cho_bo_sung'
   | 'hoan_thanh'

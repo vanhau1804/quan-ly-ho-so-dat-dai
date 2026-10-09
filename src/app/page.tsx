@@ -246,6 +246,7 @@ export default function HomePage() {
         onResetData={handleResetData}
         totalRecords={records.length}
         currentUser={currentUser}
+        records={records}
         onLogout={handleLogout}
       />
 

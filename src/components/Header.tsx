@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User } from '@/types';
+import { User, LandRecord } from '@/types';
 import {
   FileText,
   PlusCircle,
@@ -21,6 +21,7 @@ interface HeaderProps {
   onResetData: () => void;
   totalRecords: number;
   currentUser: User;
+  records: LandRecord[];
   onLogout: () => void;
 }
 
@@ -32,8 +33,27 @@ export const Header: React.FC<HeaderProps> = ({
   onResetData,
   totalRecords,
   currentUser,
+  records,
   onLogout,
 }) => {
+  // Logic tính toán thông báo
+  const pendingApprovalCount = records.filter(r => r.status === 'cho_duyet').length;
+  const newAssignedCount = records.filter(r => r.status === 'tiep_nhan' && r.assignedOfficer === currentUser.fullName).length;
+
+  let notifMessage = '';
+  let notifCount = 0;
+  if (currentUser.role === 'admin' || currentUser.role === 'manager') {
+    if (pendingApprovalCount > 0) {
+      notifCount = pendingApprovalCount;
+      notifMessage = `Có ${pendingApprovalCount} hồ sơ đang chờ bạn duyệt!`;
+    }
+  } else {
+    if (newAssignedCount > 0) {
+      notifCount = newAssignedCount;
+      notifMessage = `Bạn được giao ${newAssignedCount} hồ sơ mới!`;
+    }
+  }
+
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,6 +81,16 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Nhóm nút tác vụ nhanh */}
           <div className="flex flex-wrap items-center gap-2">
             
+            {notifCount > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 mr-2 bg-orange-50 border border-orange-200 rounded-lg animate-pulse">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                </span>
+                <span className="text-xs font-semibold text-orange-700">{notifMessage}</span>
+              </div>
+            )}
+
             {/* Hiển thị User */}
             <div className="flex items-center gap-2 px-3 py-1.5 mr-2 border-r border-slate-200">
               <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">

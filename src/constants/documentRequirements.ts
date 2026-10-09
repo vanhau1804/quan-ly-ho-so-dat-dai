@@ -86,6 +86,11 @@ export const RECORD_STATUS_CONFIG: Record<
     badgeClass: 'bg-amber-50 text-amber-700 border-amber-300',
     dotClass: 'bg-amber-500',
   },
+  cho_duyet: {
+    label: 'Chờ duyệt',
+    badgeClass: 'bg-orange-50 text-orange-700 border-orange-300',
+    dotClass: 'bg-orange-500',
+  },
   cho_thue: {
     label: 'Chờ thông báo thuế',
     badgeClass: 'bg-violet-50 text-violet-700 border-violet-300',
