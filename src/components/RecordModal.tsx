@@ -30,6 +30,20 @@ import {
   Info,
 } from 'lucide-react';
 
+// Hàm định dạng số tiền có dấu chấm phân cách hàng nghìn (ví dụ: 15.000.000)
+function formatNumberWithDots(val: number | string): string {
+  if (val === '' || val === null || val === undefined) return '';
+  const clean = String(val).replace(/\D/g, '');
+  if (!clean) return '';
+  return new Intl.NumberFormat('vi-VN').format(Number(clean));
+}
+
+// Chuyển đổi chuỗi có dấu chấm về dạng số nguyên thuần túy (ví dụ: "15.000.000" -> 15000000)
+function parseNumberFromDots(val: string): number {
+  const clean = val.replace(/\./g, '').replace(/\D/g, '');
+  return clean ? Number(clean) : 0;
+}
+
 interface RecordModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -932,39 +946,96 @@ export const RecordModal: React.FC<RecordModalProps> = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Giá trị hợp đồng dịch vụ (VNĐ)
                   </label>
-                  <input
-                    type="number"
-                    step="500000"
-                    value={serviceFee}
-                    onChange={(e) => setServiceFee(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-800"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatNumberWithDots(serviceFee)}
+                      onChange={(e) => setServiceFee(parseNumberFromDots(e.target.value))}
+                      placeholder="15.000.000"
+                      className="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-800"
+                    />
+                    <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-medium text-slate-400 pointer-events-none">
+                      đ
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
+                    <span>Thêm nhanh:</span>
+                    <button
+                      type="button"
+                      onClick={() => setServiceFee(serviceFee + 1000000)}
+                      className="px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+                    >
+                      +1.000.000đ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setServiceFee(serviceFee + 5000000)}
+                      className="px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+                    >
+                      +5.000.000đ
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tiền tạm ứng khi nhận hồ sơ (VNĐ)
                   </label>
-                  <input
-                    type="number"
-                    step="500000"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatNumberWithDots(depositAmount)}
+                      onChange={(e) => setDepositAmount(parseNumberFromDots(e.target.value))}
+                      placeholder="5.000.000"
+                      className="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+                    />
+                    <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-medium text-slate-400 pointer-events-none">
+                      đ
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const half = Math.round(serviceFee / 2);
+                        setDepositAmount(half);
+                        if (paidAmount === 0) setPaidAmount(half);
+                      }}
+                      className="px-1.5 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
+                    >
+                      Bằng 50% HĐ
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Số tiền khách đã thanh toán (VNĐ)
                   </label>
-                  <input
-                    type="number"
-                    step="500000"
-                    value={paidAmount}
-                    onChange={(e) => setPaidAmount(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-emerald-700"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatNumberWithDots(paidAmount)}
+                      onChange={(e) => setPaidAmount(parseNumberFromDots(e.target.value))}
+                      placeholder="5.000.000"
+                      className="w-full px-3 py-2 pr-8 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-emerald-700"
+                    />
+                    <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-medium text-emerald-600 pointer-events-none">
+                      đ
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
+                    <button
+                      type="button"
+                      onClick={() => setPaidAmount(serviceFee)}
+                      className="px-1.5 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium transition-colors"
+                    >
+                      Tất toán 100%
+                    </button>
+                  </div>
                 </div>
 
                 {/* Thẻ hiển thị số tiền còn lại tự động */}
