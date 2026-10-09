@@ -151,13 +151,15 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden lg:inline">Xuất Excel</span>
             </button>
 
-            <button
-              onClick={onOpenCreateModal}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-all shadow-md shadow-blue-500/25"
-            >
-              <PlusCircle className="h-4 w-4" />
-              <span>Tạo Hồ Sơ Mới</span>
-            </button>
+            {currentUser.role === 'officer' && (
+              <button
+                onClick={onOpenCreateModal}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-all shadow-md shadow-blue-500/25"
+              >
+                <PlusCircle className="h-4 w-4" />
+                <span>Tạo Hồ Sơ Mới</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
