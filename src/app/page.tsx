@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { LandRecord, RecordType, RecordStatus } from '@/types';
+import { LandRecord, RecordType, RecordStatus, User } from '@/types';
 import {
   getAllRecords,
   saveRecord,
@@ -9,6 +9,8 @@ import {
   importRecordsBatch,
   resetToDefaultRecords,
   generateNextRecordId,
+  getCurrentUser,
+  logout,
 } from '@/lib/storage';
 import { exportRecordsToExcel, downloadExcelTemplate } from '@/lib/excel';
 import { Header } from '@/components/Header';
@@ -18,9 +20,11 @@ import { RecordTable } from '@/components/RecordTable';
 import { RecordModal } from '@/components/RecordModal';
 import { RecordDetailModal } from '@/components/RecordDetailModal';
 import { ExcelImportModal } from '@/components/ExcelImportModal';
+import { LoginForm } from '@/components/LoginForm';
 import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [records, setRecords] = useState<LandRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -50,7 +54,11 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    loadRecords();
+    const init = async () => {
+      setCurrentUser(getCurrentUser());
+      await loadRecords();
+    };
+    init();
   }, []);
 
   // Danh sách các cán bộ phụ trách duy nhất để đưa vào bộ lọc
@@ -69,6 +77,13 @@ export default function HomePage() {
     const q = searchQuery.toLowerCase().trim();
 
     return records.filter((r) => {
+      // Nếu là chuyên viên, chỉ xem được hồ sơ của mình (hoặc hồ sơ chưa giao)
+      if (currentUser?.role === 'officer') {
+        if (r.assignedOfficer !== currentUser.fullName && r.assignedOfficer !== 'Chuyên viên pháp lý') {
+          return false;
+        }
+      }
+
       // Tìm kiếm từ khóa
       if (q) {
         const matchName = r.customerName?.toLowerCase().includes(q);
@@ -111,11 +126,16 @@ export default function HomePage() {
 
       return true;
     });
-  }, [records, searchQuery, selectedType, selectedStatus, selectedOfficer]);
+  }, [records, searchQuery, selectedType, selectedStatus, selectedOfficer, currentUser]);
 
   // Thao tác Lưu hồ sơ (Tạo mới hoặc Sửa)
   const handleSaveRecord = async (savedRecord: LandRecord) => {
     try {
+      // Nếu người tạo là officer, tự động gán tên họ nếu hồ sơ mới hoặc chưa có người phụ trách
+      if (currentUser?.role === 'officer' && (!savedRecord.assignedOfficer || savedRecord.assignedOfficer === 'Chuyên viên pháp lý')) {
+        savedRecord.assignedOfficer = currentUser.fullName;
+      }
+
       await saveRecord(savedRecord);
       await loadRecords();
     } catch (err) {
@@ -126,6 +146,10 @@ export default function HomePage() {
 
   // Thao tác Xóa hồ sơ
   const handleDeleteRecord = async (id: string) => {
+    if (currentUser?.role !== 'admin' && currentUser?.role !== 'manager') {
+      alert('Bạn không có quyền xóa hồ sơ!');
+      return;
+    }
     try {
       await deleteRecord(id);
       await loadRecords();
@@ -155,7 +179,7 @@ export default function HomePage() {
           date: new Date().toISOString().slice(0, 10),
           status: newStatus,
           note,
-          officer: current.assignedOfficer,
+          officer: currentUser?.fullName || current.assignedOfficer,
         },
       ],
     };
@@ -178,6 +202,10 @@ export default function HomePage() {
 
   // Đặt lại dữ liệu mẫu ban đầu
   const handleResetData = async () => {
+    if (currentUser?.role !== 'admin') {
+      alert('Chỉ Quản trị viên (Admin) mới có quyền reset dữ liệu!');
+      return;
+    }
     if (
       confirm(
         'Bạn có chắc chắn muốn nạp lại bộ dữ liệu mẫu ban đầu? Toàn bộ các thay đổi cục bộ hiện tại sẽ được reset về mặc định.'
@@ -191,8 +219,18 @@ export default function HomePage() {
   const [suggestedNextId, setSuggestedNextId] = useState('HS-2026-001');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSuggestedNextId(generateNextRecordId(records));
   }, [records]);
+
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+  };
+
+  if (!currentUser) {
+    return <LoginForm onLoginSuccess={setCurrentUser} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col font-sans">
@@ -207,12 +245,14 @@ export default function HomePage() {
         onDownloadTemplate={downloadExcelTemplate}
         onResetData={handleResetData}
         totalRecords={records.length}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Khối thống kê chỉ số Dashboard */}
-        <DashboardStats records={records} />
+        <DashboardStats records={filteredRecords} />
 
         {/* Thanh tìm kiếm và bộ lọc đa tiêu chí */}
         <FilterBar
@@ -243,6 +283,7 @@ export default function HomePage() {
         ) : (
           <RecordTable
             records={filteredRecords}
+            currentUser={currentUser}
             onViewDetail={(rec) => setSelectedDetailRecord(rec)}
             onEdit={(rec) => {
               setRecordToEdit(rec);

@@ -27,6 +27,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ records }) => {
   React.useEffect(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setToday(d);
   }, []);
 

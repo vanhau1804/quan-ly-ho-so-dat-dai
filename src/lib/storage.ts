@@ -154,3 +154,49 @@ export function generateNextRecordId(existingRecords: LandRecord[], currentYear?
   const nextNum = (maxNumber + 1).toString().padStart(3, '0');
   return `${prefix}${nextNum}`;
 }
+
+// ================= AUTHENTICATION MOCK =================
+
+import { User } from '@/types';
+
+const MOCK_USERS: User[] = [
+  { id: 'u1', username: 'admin', fullName: 'Quản trị viên', role: 'admin', password: '123' },
+  { id: 'u2', username: 'manager', fullName: 'Lê Văn Trưởng', role: 'manager', password: '123' },
+  { id: 'u3', username: 'officer1', fullName: 'Phan Thu Hà', role: 'officer', password: '123' },
+  { id: 'u4', username: 'officer2', fullName: 'Lê Văn Minh', role: 'officer', password: '123' },
+];
+
+export async function login(username: string, password: string): Promise<User | null> {
+  const user = MOCK_USERS.find((u) => u.username === username && u.password === password);
+  if (user) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('current_user', JSON.stringify(user));
+    }
+    return user;
+  }
+  return null;
+}
+
+export function logout(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('current_user');
+  }
+}
+
+export function getCurrentUser(): User | null {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem('current_user');
+    if (data) {
+      try {
+        return JSON.parse(data) as User;
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+export function getAllUsers(): User[] {
+  return MOCK_USERS;
+}

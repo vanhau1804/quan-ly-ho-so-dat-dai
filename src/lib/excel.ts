@@ -165,7 +165,7 @@ export async function parseExcelToRecords(
   const rawData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
   const now = new Date().toISOString();
 
-  let tempRecords = [...existingRecords];
+  const tempRecords = [...existingRecords];
   const importedRecords: LandRecord[] = [];
 
   for (const row of rawData) {

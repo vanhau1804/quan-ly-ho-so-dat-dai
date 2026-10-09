@@ -100,3 +100,14 @@ export interface LandRecord {
   paymentStatus: PaymentStatus;
   paymentNotes?: string;
 }
+
+
+export type UserRole = 'admin' | 'manager' | 'officer';
+
+export interface User {
+  id: string;
+  username: string;
+  fullName: string;
+  role: UserRole;
+  password?: string; // Storing plain for mock offline demo purposes
+}

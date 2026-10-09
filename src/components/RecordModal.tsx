@@ -108,6 +108,7 @@ export const RecordModal: React.FC<RecordModalProps> = ({
   // Load dữ liệu khi mở modal (tạo mới hoặc sửa)
   useEffect(() => {
     if (recordToEdit) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRecordId(recordToEdit.id);
       setCustomerName(recordToEdit.customerName);
       setCustomerIdNumber(recordToEdit.customerIdNumber);

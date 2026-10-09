@@ -15,15 +15,9 @@ import {
   Paperclip,
   Activity,
   DollarSign,
-  Phone,
-  CreditCard,
-  Calendar,
-  Building,
   FileText,
   ExternalLink,
   CheckCircle2,
-  Clock,
-  AlertCircle,
 } from 'lucide-react';
 
 interface RecordDetailModalProps {
